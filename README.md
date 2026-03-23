@@ -2,7 +2,7 @@
 
 This repository contains a Jupyter notebook implementation of a preventive health care facility location model based on the framework in Verter and Lapierre (2002), *Location of Preventive Health Care Facilities*.
 
-The notebook uses ZIP Code Tabulation Area (ZCTA) demand and coordinates to choose facility locations that maximize captured demand while enforcing:
+The notebooks use ZIP Code Tabulation Area (ZCTA) demand and coordinates to choose facility locations that maximize captured demand while enforcing:
 
 - at most one assignment per demand point
 - assignment only to open facilities
@@ -11,13 +11,19 @@ The notebook uses ZIP Code Tabulation Area (ZCTA) demand and coordinates to choo
 
 ## Repository Contents
 
-- `MCLP_Implementation-Final_Master_File_with demand distribution-optimized.ipynb`
+- `MCLP_Implementation-Final_Master_File_with demand distribution-procudure1.ipynb`
+- `MCLP_Implementation-Final_Master_File_with demand distribution-procedure1_optimized.ipynb`
 - `Philadelphia ZCTAs Sub Service line level_Cardiology_Medical Cardiology.csv`
 - `LICENSE`
 
 ## Notebook Overview
 
-The notebook:
+This repository now includes two notebook variants:
+
+- `...-procudure1.ipynb`: the current iterative cut-generation implementation based on Section 4, Procedure I
+- `...-procedure1_optimized.ipynb`: an optimized formulation that replaces the repeated Procedure I cut loop with the paper's equation (9) closest-facility ordering constraints
+
+Both notebooks:
 
 - reads weighted demand by ZCTA
 - computes pairwise distances between demand points and candidate sites
@@ -28,32 +34,34 @@ The notebook:
 
 ## Model Notes
 
-This implementation is best described as a practical adaptation of the paper rather than a line-by-line reproduction.
+These implementations are best described as practical adaptations of the paper rather than line-by-line reproductions.
 
-Key choices in the notebook:
+Key choices in the notebooks:
 
 - `x[i, j]` indicates whether demand point `i` is assigned to facility `j`
 - `y[j]` indicates whether facility `j` is opened
 - `pfac[i, j]` represents distance-adjusted captured demand from population center `i` to site `j`
 - `min_demand` acts as a facility viability threshold
 
-The notebook currently uses the OR-Tools `SCIP` backend by default because it is free and easy to run without a commercial solver license. If you have access to a valid Gurobi license, Gurobi is generally the preferred solver for better performance on larger mixed-integer models.
+The notebooks currently use the OR-Tools `SCIP` backend by default because it is free and easy to run without a commercial solver license. If you have access to a valid Gurobi license, Gurobi is generally the preferred solver for better performance on larger mixed-integer models.
 
 ## Runtime Improvements Included
 
-The current notebook includes several runtime-oriented changes that do not change the model logic:
+Both notebooks include several runtime-oriented changes that do not change the underlying model intent:
 
 - binary decision variables are declared with `BoolVar`
 - infeasible assignments outside the service radius are omitted from the model
 - assignment and workload structures are stored sparsely using feasible `(i, j)` pairs only
 - facilities that can never satisfy `min_demand` even under best-case assignment are screened out before solving
-- Procedure I uses precomputed site orderings to speed up closest-open-facility checks
+- the Procedure I notebook uses precomputed site orderings to speed up closest-open-facility checks
+
+The optimized equation (9) notebook goes further by building the closest-facility ordering directly into the model and solving a single mixed-integer program instead of repeatedly adding cuts.
 
 These changes are especially helpful when `min_demand` is large.
 
 ## Input Data
 
-The notebook expects a CSV with fields including:
+Each notebook expects a CSV with fields including:
 
 - `zcta`
 - `weighted demand`
@@ -66,7 +74,7 @@ The included sample file is:
 
 ## Requirements
 
-Install the main Python dependencies before running the notebook:
+Install the main Python dependencies before running either notebook:
 
 ```bash
 pip install ortools haversine numpy pandas matplotlib plotly
@@ -82,14 +90,16 @@ You would also need a valid Gurobi license.
 
 ## How To Run
 
-1. Open the notebook in Jupyter Notebook or JupyterLab.
+1. Open either notebook in Jupyter Notebook or JupyterLab.
 2. Confirm the CSV path points to the local dataset.
 3. Run the cells in order from top to bottom.
-4. Review the selected facilities, demand capture summaries, and maps.
+4. Start with `...-procudure1.ipynb` if you want the iterative Procedure I version.
+5. Use `...-procedure1_optimized.ipynb` if the Procedure I notebook converges slowly and you want the equation (9) reformulation.
+6. Review the selected facilities, demand capture summaries, and maps.
 
 ## Outputs
 
-The notebook produces:
+Both notebooks produce:
 
 - selected facility locations
 - demand-to-facility assignments
@@ -101,7 +111,8 @@ The notebook produces:
 
 - Distances are computed with haversine distance between coordinates, which is an approximation of real travel distance.
 - Results depend strongly on `min_demand`, the travel threshold, and the quality of the weighted demand input.
-- Procedure I can still take substantial time on larger instances or high minimum-demand thresholds.
+- The Procedure I notebook can still take substantial time on larger instances or high minimum-demand thresholds.
+- The equation (9) notebook is usually faster, but it relies on distance ordering and can require care in edge cases with tied distances.
 - The notebook is intended for research and prototyping, not production deployment.
 
 ## Reference

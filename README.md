@@ -1,87 +1,109 @@
-# MCLP-Implemention
-Predict optimal locations to open healthcare facility in a geographical area 
+# Preventive Health Care Facility Location
 
-# Preventive Health Care Facility Location using MCLP
+This repository contains a Jupyter notebook implementation of a preventive health care facility location model based on the framework in Verter and Lapierre (2002), *Location of Preventive Health Care Facilities*.
 
-This repository contains a Jupyter notebook implementation of a preventive health care facility location model inspired by Verter and Lapierre (2002), *Location of Preventive Health Care Facilities*.
+The notebook uses ZIP Code Tabulation Area (ZCTA) demand and coordinates to choose facility locations that maximize captured demand while enforcing:
 
-The notebook solves a maximal covering / facility location style optimization problem to identify candidate health care facility locations that maximize captured demand subject to service accessibility and minimum workload requirements.
+- at most one assignment per demand point
+- assignment only to open facilities
+- a minimum workload threshold for each open facility
+- closest-open-facility logic through an iterative cut procedure inspired by Section 4, Procedure I of the paper
 
-## File
+## Repository Contents
 
-- `MCLP_Implementation-Final_Master_File_with demand distribution-with_bug_fixes.ipynb`
+- `MCLP_Implementation-Final_Master_File_with demand distribution-with_gurobi.ipynb`
+- `Philadelphia ZCTAs Sub Service line level_Cardiology_Medical Cardiology.csv`
+- `LICENSE`
 
-## Overview
+## Notebook Overview
 
-The model uses ZIP Code Tabulation Area (ZCTA)-level demand and geographic coordinates to:
+The notebook:
 
-- estimate demand at each population center
-- compute distances between demand locations and candidate facility sites
-- assign demand points to facilities
-- enforce a minimum workload threshold for any opened facility
-- iteratively enforce closest-open-facility assignment logic based on the exact solution approach described in Section 4, Procedure I of Verter and Lapierre (2002)
-- visualize selected facility locations and demand capture
+- reads weighted demand by ZCTA
+- computes pairwise distances between demand points and candidate sites
+- estimates participation as a linear decay function of distance
+- solves a mixed-integer optimization model with OR-Tools
+- iteratively adds violated closest-facility constraints
+- visualizes selected sites and demand capture
 
-## Methodology
+## Model Notes
 
-This notebook is based on the preventive health care location framework proposed by Verter and Lapierre (2002).
+This implementation is best described as a practical adaptation of the paper rather than a line-by-line reproduction.
 
-Key modeling elements used here include:
+Key choices in the notebook:
 
-- binary facility-opening decisions
-- binary assignment decisions
-- distance-based participation / demand capture
-- minimum demand threshold for open facilities
-- iterative addition of violated closest-facility constraints
+- `x[i, j]` indicates whether demand point `i` is assigned to facility `j`
+- `y[j]` indicates whether facility `j` is opened
+- `pfac[i, j]` represents distance-adjusted captured demand from population center `i` to site `j`
+- `min_demand` acts as a facility viability threshold
 
-The implementation is best described as a practical adaptation of the paper’s Procedure I for experimentation with real geographic demand data.
+The notebook currently uses the OR-Tools `SCIP` backend by default. The file name includes `with_gurobi`, but Gurobi is not required unless you explicitly switch the solver backend and have a valid Gurobi installation and license.
+
+## Runtime Improvements Included
+
+The current notebook includes several runtime-oriented changes that do not change the model logic:
+
+- binary decision variables are declared with `BoolVar`
+- infeasible assignments outside the service radius are omitted from the model
+- assignment and workload structures are stored sparsely using feasible `(i, j)` pairs only
+- facilities that can never satisfy `min_demand` even under best-case assignment are screened out before solving
+- Procedure I uses precomputed site orderings to speed up closest-open-facility checks
+
+These changes are especially helpful when `min_demand` is large.
 
 ## Input Data
 
-The notebook expects a CSV input file with fields such as:
+The notebook expects a CSV with fields including:
 
 - `zcta`
 - `weighted demand`
 - `internal_pt_lat`
 - `internal_pt_lon`
 
-Example input used in the notebook:
+The included sample file is:
 
 - `Philadelphia ZCTAs Sub Service line level_Cardiology_Medical Cardiology.csv`
 
 ## Requirements
 
-Install the main dependencies before running the notebook:
+Install the main Python dependencies before running the notebook:
 
 ```bash
 pip install ortools haversine numpy pandas matplotlib plotly
 ```
 
-## How to Run
-Open the notebook in Jupyter Notebook or JupyterLab.
-Update the CSV file path if needed.
-Run the cells in order.
+If you want to test Gurobi separately:
 
-## Review:
-selected facility locations
-assignment behavior
-demand capture output
-geographic visualizations
+```bash
+pip install gurobipy
+```
+
+You would also need a valid Gurobi license.
+
+## How To Run
+
+1. Open the notebook in Jupyter Notebook or JupyterLab.
+2. Confirm the CSV path points to the local dataset.
+3. Run the cells in order from top to bottom.
+4. Review the selected facilities, demand capture summaries, and maps.
 
 ## Outputs
-The notebook produces:
-the set of selected facility sites
-assignment of demand points to open facilities
-estimated demand captured by each selected facility
-scatter and geographic plots of chosen locations
-summary tables for demand distribution
 
-## Notes and Limitations
-This implementation is based on the paper, but may include practical adaptations for experimentation.
-Distances are computed using haversine distance between point coordinates.
-The quality of the solution depends heavily on the demand model, travel threshold, and minimum demand parameter.
-This notebook is intended for research, prototyping, and analytical exploration rather than production deployment.
+The notebook produces:
+
+- selected facility locations
+- demand-to-facility assignments
+- demand capture by open facility
+- scatter and geographic plots
+- demand capture summaries by ZCTA
+
+## Limitations
+
+- Distances are computed with haversine distance between coordinates, which is an approximation of real travel distance.
+- Results depend strongly on `min_demand`, the travel threshold, and the quality of the weighted demand input.
+- Procedure I can still take substantial time on larger instances or high minimum-demand thresholds.
+- The notebook is intended for research and prototyping, not production deployment.
 
 ## Reference
-Verter, V., & Lapierre, S. D. (2002). Location of preventive health care facilities. Annals of Operations Research, 110, 123-132.
 
+Verter, V., & Lapierre, S. D. (2002). Location of preventive health care facilities. *Annals of Operations Research*, 110, 123-132.

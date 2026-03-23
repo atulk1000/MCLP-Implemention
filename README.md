@@ -11,7 +11,7 @@ The notebook uses ZIP Code Tabulation Area (ZCTA) demand and coordinates to choo
 
 ## Repository Contents
 
-- `MCLP_Implementation-Final_Master_File_with demand distribution-with_gurobi.ipynb`
+- `MCLP_Implementation-Final_Master_File_with demand distribution-final.ipynb`
 - `Philadelphia ZCTAs Sub Service line level_Cardiology_Medical Cardiology.csv`
 - `LICENSE`
 
@@ -37,7 +37,7 @@ Key choices in the notebook:
 - `pfac[i, j]` represents distance-adjusted captured demand from population center `i` to site `j`
 - `min_demand` acts as a facility viability threshold
 
-The notebook currently uses the OR-Tools `SCIP` backend by default. The file name includes `with_gurobi`, but Gurobi is not required unless you explicitly switch the solver backend and have a valid Gurobi installation and license.
+The notebook currently uses the OR-Tools `SCIP` backend by default because it is free and easy to run without a commercial solver license. If you have access to a valid Gurobi license, Gurobi is generally the preferred solver for better performance on larger mixed-integer models.
 
 ## Runtime Improvements Included
 

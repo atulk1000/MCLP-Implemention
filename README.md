@@ -11,7 +11,7 @@ The notebooks use ZIP Code Tabulation Area (ZCTA) demand and coordinates to choo
 
 ## Repository Contents
 
-- `MCLP_Implementation-Final_Master_File_with demand distribution-procudure1.ipynb`
+- `MCLP_Implementation-Final_Master_File_with demand distribution-procedure1.ipynb`
 - `MCLP_Implementation-Final_Master_File_with demand distribution-procedure1_optimized.ipynb`
 - `Philadelphia ZCTAs Sub Service line level_Cardiology_Medical Cardiology.csv`
 - `LICENSE`
@@ -20,7 +20,7 @@ The notebooks use ZIP Code Tabulation Area (ZCTA) demand and coordinates to choo
 
 This repository now includes two notebook variants:
 
-- `...-procudure1.ipynb`: the current iterative cut-generation implementation based on Section 4, Procedure I
+- `...-procedure1.ipynb`: the current iterative cut-generation implementation based on Section 4, Procedure I
 - `...-procedure1_optimized.ipynb`: an optimized formulation that replaces the repeated Procedure I cut loop with the paper's equation (9) closest-facility ordering constraints
 
 Both notebooks:
@@ -93,7 +93,7 @@ You would also need a valid Gurobi license.
 1. Open either notebook in Jupyter Notebook or JupyterLab.
 2. Confirm the CSV path points to the local dataset.
 3. Run the cells in order from top to bottom.
-4. Start with `...-procudure1.ipynb` if you want the iterative Procedure I version.
+4. Start with `...-procedure1.ipynb` if you want the iterative Procedure I version.
 5. Use `...-procedure1_optimized.ipynb` if the Procedure I notebook converges slowly and you want the equation (9) reformulation.
 6. Review the selected facilities, demand capture summaries, and maps.
 
